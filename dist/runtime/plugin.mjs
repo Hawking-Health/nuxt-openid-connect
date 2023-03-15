@@ -6,7 +6,7 @@ import { useState, useFetch, useRuntimeConfig, useCookie } from "#imports";
 export class Oidc {
   // LocalStorage: Browser.localStorage （share state in all sites, use in page refresh.）
   constructor() {
-    this.state = { user: {}, isLoggedIn: false };
+    this.state = { user: {}, isLoggedIn: false, accessToken: "" };
     this.$useState = useState("useState", () => {
       return { user: {}, isLoggedIn: false };
     });
@@ -45,6 +45,10 @@ export class Oidc {
       if (process.server) {
         const { config } = useRuntimeConfig()?.openidConnect;
         const userinfoCookie = useCookie(config.cookiePrefix + "user_info");
+        const accessTokenCookie = useCookie(config.cookiePrefix + "access_token");
+        if (isSet(accessTokenCookie) && accessTokenCookie.value) {
+          this.state.accessToken = accessTokenCookie.value;
+        }
         if (isSet(userinfoCookie) && userinfoCookie.value) {
           const userInfoStr = await decrypt(userinfoCookie.value, config);
           if (userInfoStr) {
