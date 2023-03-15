@@ -43,7 +43,7 @@ export class Oidc {
   async fetchUser() {
     try {
       if (process.server) {
-        const { config } = useRuntimeConfig()?.public?.openidConnect;
+        const { config } = useRuntimeConfig()?.openidConnect;
         const userinfoCookie = useCookie(config.cookiePrefix + "user_info");
         if (isSet(userinfoCookie) && userinfoCookie.value) {
           const userInfoStr = await decrypt(userinfoCookie.value, config);
