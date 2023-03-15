@@ -18,7 +18,7 @@ export class Oidc {
   constructor() {
     this.state = { user: {}, isLoggedIn: false, accessToken: '' }
 
-    this.$useState = useState<UseState>('useState', () => { return { user: {}, isLoggedIn: false } })
+    this.$useState = useState<UseState>('useState', () => { return { user: {}, isLoggedIn: false, accessToken: '' } })
     const { config } = useRuntimeConfig()?.public?.openidConnect
 
     const storageOption = {
