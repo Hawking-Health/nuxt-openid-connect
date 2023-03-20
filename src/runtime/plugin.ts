@@ -69,10 +69,10 @@ export class Oidc {
         const { config } = useRuntimeConfig()?.openidConnect
         const userinfoCookie = useCookie(config.cookiePrefix + 'user_info')
         const accessTokenCookie = useCookie(config.cookiePrefix + 'access_token')
-        const refreshTokenCookie = useCookie(config.cookiePrefix + 'refresh_token')
-        if (isSet(refreshTokenCookie) && refreshTokenCookie.value) {
-          this.state.refreshToken = refreshTokenCookie.value
-        }
+        // const refreshTokenCookie = useCookie(config.cookiePrefix + 'refresh_token')
+        // if (isSet(refreshTokenCookie) && refreshTokenCookie.value) {
+        //   this.state.refreshToken = refreshTokenCookie.value
+        // }
         if (isSet(accessTokenCookie) && accessTokenCookie.value) {
           this.state.accessToken = accessTokenCookie.value
         }
