@@ -38,15 +38,10 @@ export default defineNuxtConfig({
   openidConnect: {
     addPlugin: true,
     op: {
-      issuer: 'http://192.168.26.114:8080/realms/test', // change to your OP addrress
-      clientId: 'testClient',
-      clientSecret: 'cnuLA78epx8s8vMbRxcaiXbzlS4u8bSA',
-      callbackUrl: 'http://192.168.26.114:3000/oidc/callback', // optional
-      scope: [
-        'email',
-        'profile',
-        'address'
-      ]
+      issuer: 'https://auth-test.hawking.health/realms/HAWKING',
+      clientId: 'quest',
+      clientSecret: 'dbWEGv0Ojuyv5b4fmZFQuEhwdyVvonrf',
+      scope: ['profile']
     },
     config: {
       debug: true,

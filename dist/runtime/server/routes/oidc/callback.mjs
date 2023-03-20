@@ -3,6 +3,7 @@ import { initClient } from "../../../utils/issueclient.mjs";
 import { encrypt } from "../../../utils/encrypt.mjs";
 import { logger } from "../../../utils/logger.mjs";
 import { getRedirectUrl, getCallbackUrl, getDefaultBackUrl, getResponseMode } from "../../../utils/utils.mjs";
+import jwt_decode from "jwt-decode";
 import { useRuntimeConfig } from "#imports";
 export default defineEventHandler(async (event) => {
   const req = event.node.req;
@@ -27,14 +28,15 @@ export default defineEventHandler(async (event) => {
   const params = issueClient.callbackParams(request);
   if (params.access_token) {
     logger.debug("[CALLBACK]: has access_token in params, accessToken:" + params.access_token);
-    await getUserInfo(params.access_token);
+    await getUserInfo(params.access_token, "");
     res.writeHead(302, { Location: redirectUrl || "/" });
     res.end();
   } else if (params.code) {
     logger.debug("[CALLBACK]: has code in params, code:" + params.code + " ,sessionid=" + sessionid);
     const tokenSet = await issueClient.callback(callbackUrl, params, { nonce: sessionid });
+    console.log("token is :", isTokenExpired(tokenSet.access_token));
     if (tokenSet.access_token) {
-      await getUserInfo(tokenSet.access_token);
+      await getUserInfo(tokenSet.access_token, tokenSet.refresh_token);
     }
     res.writeHead(302, { Location: redirectUrl || "/" });
     res.end();
@@ -54,13 +56,36 @@ export default defineEventHandler(async (event) => {
       res.end();
     }
   }
-  async function getUserInfo(accessToken) {
+  function isTokenExpired(token) {
+    const exp = jwt_decode(token).exp;
+    return !(exp * 1e3 >= Date.now());
+  }
+  function refreshTokenPeriodically(token) {
+    setInterval(() => {
+      if (!isTokenExpired(token)) {
+        return;
+      }
+      fetch(process.env.TESTING + "/protocol/openid-connect/token", {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "POST",
+        body: JSON.stringify({
+          grant_type: "refresh_token",
+          refresh_token: token,
+          client_id: "quest"
+        })
+      }).then((response) => response.json()).then((data) => localStorage.setItem("token", data.token)).catch((error) => console.error(error));
+    }, 3e4);
+  }
+  async function getUserInfo(accessToken, refreshToken) {
     try {
       const userinfo = await issueClient.userinfo(accessToken);
       setCookie(event, config.cookiePrefix + "access_token", accessToken, {
         maxAge: config.cookieMaxAge,
         ...config.cookieFlags["access_token"]
       });
+      setCookie(event, config.cookiePrefix + "refresh_token", refreshToken, { maxAge: config.cookieMaxAge });
       const cookie = config.cookie;
       for (const [key, value] of Object.entries(userinfo)) {
         if (cookie && Object.prototype.hasOwnProperty.call(cookie, key)) {

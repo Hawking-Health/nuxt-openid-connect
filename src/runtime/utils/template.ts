@@ -7,9 +7,6 @@ export const CBT_PAGE_TEMPATE = `
 <html>
 
 <body>
-
-  <h1>OIDC Callback Middle Page. Loading...</h1>
-
   <script>
     const hash = window.location.hash
     if (window.location.href.includes('cbt#')) {

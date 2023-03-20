@@ -3,11 +3,13 @@ import { Storage, StorageOptions } from './storage'
 import { isUnset, isSet } from './utils/utils'
 import { encrypt, decrypt } from './utils/encrypt'
 import { useState, useFetch, useRuntimeConfig, useCookie } from '#imports'
+import jwt_decode from 'jwt-decode';
 
 interface UseState {
   user: any,
   isLoggedIn: boolean,
-  accessToken: string
+  accessToken: string,
+  refreshToken: string
 }
 
 export class Oidc {
@@ -16,9 +18,9 @@ export class Oidc {
   public $storage: Storage // LocalStorage: Browser.localStorage （share state in all sites, use in page refresh.）
 
   constructor() {
-    this.state = { user: {}, isLoggedIn: false, accessToken: '' }
+    this.state = { user: {}, isLoggedIn: false, accessToken: '', refreshToken: '' }
 
-    this.$useState = useState<UseState>('useState', () => { return { user: {}, isLoggedIn: false, accessToken: '' } })
+    this.$useState = useState<UseState>('useState', () => { return { user: {}, isLoggedIn: false, accessToken: '', refreshToken: '' } })
     const { config } = useRuntimeConfig()?.public?.openidConnect
 
     const storageOption = {
@@ -67,6 +69,10 @@ export class Oidc {
         const { config } = useRuntimeConfig()?.openidConnect
         const userinfoCookie = useCookie(config.cookiePrefix + 'user_info')
         const accessTokenCookie = useCookie(config.cookiePrefix + 'access_token')
+        const refreshTokenCookie = useCookie(config.cookiePrefix + 'refresh_token')
+        if (isSet(refreshTokenCookie) && refreshTokenCookie.value) {
+          this.state.refreshToken = refreshTokenCookie.value
+        }
         if (isSet(accessTokenCookie) && accessTokenCookie.value) {
           this.state.accessToken = accessTokenCookie.value
         }

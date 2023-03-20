@@ -4,6 +4,7 @@ import { initClient } from '../../../utils/issueclient'
 import { encrypt } from '../../../utils/encrypt'
 import { logger } from '../../../utils/logger'
 import { getRedirectUrl, getCallbackUrl, getDefaultBackUrl, getResponseMode } from '../../../utils/utils'
+import jwt_decode from 'jwt-decode'
 import { useRuntimeConfig } from '#imports'
 
 export default defineEventHandler(async (event) => {
@@ -38,7 +39,7 @@ export default defineEventHandler(async (event) => {
   if (params.access_token) {
     // Implicit ID Token Flow: access_token
     logger.debug('[CALLBACK]: has access_token in params, accessToken:' + params.access_token)
-    await getUserInfo(params.access_token)
+    await getUserInfo(params.access_token, '')
     res.writeHead(302, { Location: redirectUrl || '/' })
     res.end()
   } else if (params.code) {
@@ -47,8 +48,10 @@ export default defineEventHandler(async (event) => {
     const tokenSet = await issueClient.callback(callbackUrl, params, { nonce: sessionid })
     // logger.info('received and validated tokens %j', tokenSet)
     // logger.info('validated ID Token claims %j', tokenSet.claims())
+    console.log('token is :', isTokenExpired(tokenSet.access_token))
+
     if (tokenSet.access_token) {
-      await getUserInfo(tokenSet.access_token)
+      await getUserInfo(tokenSet.access_token, tokenSet.refresh_token)
     }
     res.writeHead(302, { Location: redirectUrl || '/' })
     res.end()
@@ -72,7 +75,34 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  async function getUserInfo(accessToken: string) {
+  function isTokenExpired(token: string) {
+    const exp = jwt_decode(token).exp
+    return !(exp * 1000 >= Date.now())
+  }
+
+  function refreshTokenPeriodically(token: string) {
+    setInterval(() => {
+      if (!isTokenExpired(token)) {
+        return
+      }
+      fetch(process.env.TESTING + '/protocol/openid-connect/token', {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          grant_type: 'refresh_token',
+          refresh_token: token,
+          client_id: 'quest'
+        })
+      })
+        .then(response => response.json())
+        .then(data => localStorage.setItem('token', data.token))
+        .catch(error => console.error(error))
+    }, 30000)
+  }
+
+  async function getUserInfo(accessToken: string, refreshToken: string) {
     try {
       const userinfo = await issueClient.userinfo(accessToken)
       // logger.info(userinfo)
@@ -80,6 +110,8 @@ export default defineEventHandler(async (event) => {
         maxAge: config.cookieMaxAge,
         ...config.cookieFlags['access_token' as keyof typeof config.cookieFlags]
       })
+
+      setCookie(event, config.cookiePrefix + 'refresh_token', refreshToken, { maxAge: config.cookieMaxAge })
       const cookie = config.cookie
       for (const [key, value] of Object.entries(userinfo)) {
         if (cookie && Object.prototype.hasOwnProperty.call(cookie, key)) {
