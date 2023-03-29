@@ -8,14 +8,17 @@ export const getRedirectUrl = (uri) => {
   const searchParams = new URLSearchParams(idx >= 0 ? uri.substring(idx) : uri);
   return searchParams.get("redirect") || "/";
 };
-export function getCallbackUrl(callbackUrl, redirectUrl, host) {
+export function getCallbackUrl(callbackUrl, redirectUrl, host, useSsl) {
   if (callbackUrl && callbackUrl.length > 0) {
     return callbackUrl.includes("?") ? callbackUrl + "&redirect=" + redirectUrl : callbackUrl + "?redirect=" + redirectUrl;
   } else {
-    return getDefaultBackUrl(redirectUrl, host);
+    return getDefaultBackUrl(redirectUrl, host, useSsl);
   }
 }
-export function getDefaultBackUrl(redirectUrl, host) {
+export function getDefaultBackUrl(redirectUrl, host, useSsl) {
+  if (useSsl) {
+    return "https://" + host + "/oidc/cbt?redirect=" + redirectUrl;
+  }
   return "http://" + host + "/oidc/cbt?redirect=" + redirectUrl;
 }
 export function getResponseMode(config) {

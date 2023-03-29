@@ -12,16 +12,20 @@ export const getRedirectUrl = (uri: string | null | undefined): string => {
   return searchParams.get('redirect') || '/'
 }
 
-export function getCallbackUrl(callbackUrl: string, redirectUrl: string, host: string | undefined): string {
+export function getCallbackUrl(callbackUrl: string, redirectUrl: string, host: string | undefined, useSsl: boolean | false): string {
   if ((callbackUrl && callbackUrl.length > 0)) {
     return callbackUrl.includes('?') ? (callbackUrl + '&redirect=' + redirectUrl) : (callbackUrl + '?redirect=' + redirectUrl)
   } else {
-    return getDefaultBackUrl(redirectUrl, host)
+    return getDefaultBackUrl(redirectUrl, host, useSsl)
   }
 }
 
-export function getDefaultBackUrl(redirectUrl: string, host: string | undefined): string {
-  return 'http://' + host + '/oidc/cbt?redirect=' + redirectUrl
+export function getDefaultBackUrl(redirectUrl, host, useSsl) {
+  if (useSsl) {
+    return "https://" + host + "/oidc/cbt?redirect=" + redirectUrl;
+  } 
+  
+  return "http://" + host + "/oidc/cbt?redirect=" + redirectUrl; 
 }
 
 /**

@@ -15,6 +15,7 @@ type OidcProvider = {
     clientId: string;
     clientSecret: string;
     callbackUrl: string;
+    useSsl: boolean;
     scope: Array<string>;
 };
 type Config = {

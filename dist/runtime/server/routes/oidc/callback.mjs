@@ -22,8 +22,8 @@ export default defineEventHandler(async (event) => {
   const responseMode = getResponseMode(config);
   const sessionid = getCookie(event, config.secret);
   const redirectUrl = getRedirectUrl(req.url);
-  const callbackUrl = getCallbackUrl(op.callbackUrl, redirectUrl, req.headers.host);
-  const defCallBackUrl = getDefaultBackUrl(redirectUrl, req.headers.host);
+  const callbackUrl = getCallbackUrl(op.callbackUrl, redirectUrl, req.headers.host, op.useSsl);
+  const defCallBackUrl = getDefaultBackUrl(redirectUrl, req.headers.host, op.useSsl);
   const issueClient = await initClient(op, req, [defCallBackUrl, callbackUrl]);
   const params = issueClient.callbackParams(request);
   if (params.access_token) {

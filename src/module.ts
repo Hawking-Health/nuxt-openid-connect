@@ -20,6 +20,7 @@ export type OidcProvider = {
   clientId: string,
   clientSecret: string,
   callbackUrl: string,
+  useSsl: boolean,
   scope: Array<string>
 }
 
@@ -63,6 +64,7 @@ export default defineNuxtModule<ModuleOptions>({
       clientId: '',
       clientSecret: '',
       callbackUrl: '',
+      useSsl: false,
       scope: [
       ]
     },

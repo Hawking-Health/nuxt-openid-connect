@@ -8,6 +8,7 @@ export default defineEventHandler((event) => {
 
   const { config } = useRuntimeConfig().openidConnect
   deleteCookie(event, config.secret)
+  deleteCookie(event, config.cookiePrefix + 'refresh_token')
   deleteCookie(event, config.cookiePrefix + 'access_token')
   deleteCookie(event, config.cookiePrefix + 'user_info')
 

@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
   // logger.info('---Callback. redirectUrl:' + redirectUrl)
   // logger.info(' -- req.url:' + req.url + '   #method:' + req.method + ' #response_mode:' + responseMode)
 
-  const callbackUrl = getCallbackUrl(op.callbackUrl, redirectUrl, req.headers.host)
-  const defCallBackUrl = getDefaultBackUrl(redirectUrl, req.headers.host)
+  const callbackUrl = getCallbackUrl(op.callbackUrl, redirectUrl, req.headers.host, op.useSsl)
+  const defCallBackUrl = getDefaultBackUrl(redirectUrl, req.headers.host, op.useSsl)
 
   const issueClient = await initClient(op, req, [defCallBackUrl, callbackUrl])
   const params = issueClient.callbackParams(request)

@@ -1,8 +1,8 @@
 export declare const isUnset: (o: unknown) => boolean;
 export declare const isSet: (o: unknown) => boolean;
 export declare const getRedirectUrl: (uri: string | null | undefined) => string;
-export declare function getCallbackUrl(callbackUrl: string, redirectUrl: string, host: string | undefined): string;
-export declare function getDefaultBackUrl(redirectUrl: string, host: string | undefined): string;
+export declare function getCallbackUrl(callbackUrl: string, redirectUrl: string, host: string | undefined, useSsl: boolean | false): string;
+export declare function getDefaultBackUrl(redirectUrl: any, host: any, useSsl: any): string;
 /**
    * Response Mode
    *   The Response Mode determines how the Authorization Server returns result parameters from the Authorization Endpoint.
