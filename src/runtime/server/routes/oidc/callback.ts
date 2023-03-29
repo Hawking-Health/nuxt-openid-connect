@@ -48,7 +48,6 @@ export default defineEventHandler(async (event) => {
     const tokenSet = await issueClient.callback(callbackUrl, params, { nonce: sessionid })
     // logger.info('received and validated tokens %j', tokenSet)
     // logger.info('validated ID Token claims %j', tokenSet.claims())
-    console.log('token is :', isTokenExpired(tokenSet.access_token))
 
     if (tokenSet.access_token) {
       await getUserInfo(tokenSet.access_token, tokenSet.refresh_token)
